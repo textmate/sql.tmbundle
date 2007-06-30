@@ -33,6 +33,6 @@ puts "&lt;script&gt;window.location='#{url}'&lt;/script&gt;"</string>
 	<key>scope</key>
 	<string>source.sql</string>
 	<key>uuid</key>
-	<string>AF7AB970-DFA1-4136-B8F2-B9750D730FAA</string>
+	<string>245B2739-B3C5-4BBD-9772-C97C3C790BB6</string>
 </dict>
 </plist>
