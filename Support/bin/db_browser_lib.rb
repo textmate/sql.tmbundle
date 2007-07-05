@@ -75,8 +75,15 @@ class Connector
 
   def database_list
     databases = []
+    db_list = []
     if @server == 'postgresql'
-      db_list = `psql -l --host="#{@settings.host}" --port="#{@settings.port}" --user="#{@settings.user}" --html 2>&1`.to_a
+      # Postgres doesn't allow passwords to be specified on the commandline
+      # We can use --password to force the password prompt and then provide the password (even if it's blank)
+      IO.popen("psql -l --host='#{@settings.host}' --port='#{@settings.port}' --user='#{@settings.user}' --password --html 2>&1", 'w+') do |proc|
+        proc << @settings.password
+        proc.close_write
+        db_list = $'.strip.to_a if proc.read =~ /Password:/
+      end
       raise ConnectorException.new(db_list) unless $?.to_i == 0
       while line = db_list.shift
         databases << $2 if db_list.shift.match(/\s+(<td align=.*?>)(.*?)(<\/td>)/) if line.include? '<tr valign'
@@ -191,7 +198,7 @@ def store_connection_password(options, password)
   if %x{security add-internet-password -a "#{options.user}" -s "#{options.host}" -r "#{proto}" -w "#{password}" 2>&1} =~ /already exists/
     TextMate::UI.alert(:warning, "Unable to store password", <<-WARNING
 There is already a keychain entry for
-    #{options.user}@#{options.database} on #{options.host}
+    #{options.user}@#{options.name} on #{options.host}
 You must either change the entry manually or delete it so that it can be stored.
 Both can be done with the Keychain Access application found in /Applications/Utilities
 WARNING
@@ -209,7 +216,7 @@ def get_connection
     # Try to connect with either our stored password, or with no password
     @connection = Connector.new(@options.database)
   rescue Exception => error
-    if error.message =~ /access denied/i
+    if error.message.include?('access denied') or error.message.include?('no password specified') or error.message.include?('authentication failed')
       # If we got an access denied error then we can request a password from the user
       begin
         # Longer prompts get cut off
@@ -221,7 +228,9 @@ def get_connection
       store_connection_password(@options.database, password) if @connection
     else
       # Rethrow other errors (e.g. host not found)
-      raise ConnectorException.new(error.message)
+      message = error.message
+      message = message.split("\t")[2][1..-1] rescue message if error.is_a? RuntimeError
+      raise ConnectorException.new(message)
     end
   end
   unless @connection

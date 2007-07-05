@@ -109,6 +109,7 @@ def print_data(query = nil)
       # I've added the rescue as a fallback
       @message = e.message.split("\t")[2][1..-1] rescue e.message
     else
+      # This is a code error (this will never be reached, of course ;)
       @message = "<b>#{e.class.name}: #{escape(smarty(e.message))}</b>"
       @message += '<pre>' + "\t" + escape(e.backtrace.join("\n\t")) + '</pre>'
     end
