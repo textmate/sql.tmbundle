@@ -64,7 +64,7 @@ class Connector
   ####
   def table_list(database = nil)
     if @server == 'postgresql'
-      query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
+      query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';"
     elsif @server == 'mysql'
       query = 'SHOW TABLES'
     end
@@ -110,27 +110,31 @@ class Result
   end
 
   def rows
-    if @res.is_a? Mysql::Result
+    if defined?(Mysql) and @res.is_a? Mysql::Result
       @res
-    elsif @res == PostgresPR::Connection::Result
+    elsif @res.is_a? PostgresPR::Connection::Result
       @res.rows
     end
   end
   
   def fields
-    if @res.is_a? Mysql::Result
+    if defined?(Mysql) and @res.is_a? Mysql::Result
       @res.fetch_fields.map do |field|
         {:name => field.name,
          :type => [Mysql::Field::TYPE_DECIMAL, Mysql::Field::TYPE_TINY, Mysql::Field::TYPE_SHORT,
                    Mysql::Field::TYPE_LONG, Mysql::Field::TYPE_FLOAT, Mysql::Field::TYPE_DOUBLE].include?(field.type) ? :number : :string }
       end
-    elsif @res == PostgresPR::Connection::Result
+    elsif @res.is_a? PostgresPR::Connection::Result
       @res.fields.map{|field| {:name => field.name, :type => :string } }
     end
   end
   
   def num_rows
-    @res.num_rows
+    if @res.respond_to? :num_rows
+      @res.num_rows
+    else
+      rows.size
+    end
   end
 end
 

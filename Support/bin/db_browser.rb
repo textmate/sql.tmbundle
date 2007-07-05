@@ -102,8 +102,12 @@ def print_data(query = nil)
   rescue Exception => e
     @title = "Invalid query"
 
-    if e.is_a? Mysql::Error
+    if defined?(Mysql::Error) and e.is_a? Mysql::Error
       @message = escape(smarty(e.message))
+    elsif e.is_a? RuntimeError # used by Postgresql connector
+      # This is my best guess at decyphering the error messages returned by Postgresql
+      # I've added the rescue as a fallback
+      @message = e.message.split("\t")[2][1..-1] rescue e.message
     else
       @message = "<b>#{e.class.name}: #{escape(smarty(e.message))}</b>"
       @message += '<pre>' + "\t" + escape(e.backtrace.join("\n\t")) + '</pre>'
