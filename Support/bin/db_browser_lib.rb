@@ -4,6 +4,9 @@ $: << ENV['TM_BUNDLE_SUPPORT'] + '/lib/connectors' if ENV['TM_BUNDLE_SUPPORT']
 require 'ostruct'
 require ENV['TM_SUPPORT_PATH'] + '/lib/password'
 
+class ConnectorException < Exception; end;
+class MissingConfigurationException < ConnectorException; end;
+
 class Connector
   @@connector = nil
 
@@ -74,13 +77,13 @@ class Connector
     databases = []
     if @server == 'postgresql'
       db_list = `psql -l --host="#{@settings.host}" --port="#{@settings.port}" --user="#{@settings.user}" --html 2>&1`.to_a
-      raise Exception.new(db_list) unless $?.to_i == 0
+      raise ConnectorException.new(db_list) unless $?.to_i == 0
       while line = db_list.shift
         databases << $2 if db_list.shift.match(/\s+(<td align=.*?>)(.*?)(<\/td>)/) if line.include? '<tr valign'
       end
     elsif @server == 'mysql'
       db_list = `mysql -e 'show databases' --host="#{@settings.host}" --port="#{@settings.port}" --user="#{@settings.user}" --password="#{@settings.password}" --xml 2>&1`
-      raise Exception.new(db_list) unless $?.to_i == 0
+      raise ConnectorException.new(db_list) unless $?.to_i == 0
       db_list.each_line { |line| databases << $1 if line.match(/<(?:Database|field name="Database")>(.+)<\/(Database|field)>/) }
     end
     databases
@@ -131,6 +134,18 @@ class Result
   end
 end
 
+def render(template_file)
+  template = File.read(File.dirname(__FILE__) + '/../templates/' + template_file + '.rhtml')
+  ERB.new(template).result(binding)
+end
+
+def html(subtitle = nil)
+  puts html_head(:window_title => "SQL", :page_title => "Database Browser", :sub_title => subtitle || @options.database.name, :html_head => render('head'))
+  yield
+  html_footer
+  exit
+end
+
 def get_connection_settings(options)
   plist      = open(File.expand_path('~/Library/Preferences/com.macromates.textmate.plist')) { |io| OSX::PropertyList.load(io) }
   connection = plist['SQL Connections'][plist['SQL Active Connection'].first.to_i]
@@ -146,20 +161,65 @@ def get_connection_settings(options)
   options.port   = connection['port'].to_i || ((options.server == 'postgresql') ? 5432 : 3306)
 end
 
-def get_connection
-  proto = @options.database.server == 'postgresql' ? 'pgsq' : 'mysq'
+def get_connection_password(options)
+  proto = options.server == 'postgresql' ? 'pgsq' : 'mysq'
 
-  throw Exception.new('Missing configuration') unless @options.database.host# and @options.database.user
+  rd, wr = IO.pipe
+  if pid = fork
+    wr.close
+    Process.waitpid(pid)
+  else
+    STDERR.reopen(wr)
+    STDOUT.reopen('/dev/null', 'r')
+    rd.close; wr.close
+    exec(['/usr/bin/security', TextMate.app_path + "/Contents/MacOS/TextMate"], 'find-internet-password', '-g', '-a', options.user, '-s', options.host, '-r', proto)
+  end
+
+  $1 if rd.gets =~ /^password: "(.*)"$/
+end
+
+def store_connection_password(options, password)
+  proto = @options.database.server == 'postgresql' ? 'pgsq' : 'mysq'
+  if %x{security add-internet-password -a "#{options.user}" -s "#{options.host}" -r "#{proto}" -w "#{password}" 2>&1} =~ /already exists/
+    TextMate::UI.alert(:warning, "Unable to store password", <<-WARNING
+There is already a keychain entry for
+    #{options.user}@#{options.database} on #{options.host}
+You must either change the entry manually or delete it so that it can be stored.
+Both can be done with the Keychain Access application found in /Applications/Utilities
+WARNING
+)
+  end
+end
+
+def get_connection
+  raise MissingConfigurationException.new unless @options.database.host and not @options.database.host.empty?
   
-  TextMate.call_with_password(:user => @options.database.user, :url => "#{proto}://#{@options.database.host}") do |password|
-    @options.database.password = password
-    begin
-      @connection = Connector.new(@options.database)
-      :accept_pw
-    rescue Mysql::Error => e
-      :reject_pw
+  # Get the stored password if available, or nil otherwise
+  @options.database.password = get_connection_password(@options.database)
+
+  begin
+    # Try to connect with either our stored password, or with no password
+    @connection = Connector.new(@options.database)
+  rescue Exception => error
+    if error.message =~ /access denied/i
+      # If we got an access denied error then we can request a password from the user
+      begin
+        # Longer prompts get cut off
+        break unless password = TextMate::UI.request_secure_string(:title => "Enter Password", :prompt => "Enter password for #{@options.database.user}@#{@options.database.name}")
+        @options.database.password = password
+        # Try to connect with the new password
+        @connection = Connector.new(@options.database) rescue nil
+      end until @connection
+      store_connection_password(@options.database, password) if @connection
+    else
+      # Rethrow other errors (e.g. host not found)
+      raise ConnectorException.new(error.message)
     end
   end
-  abort "Cancelled" unless @connection
+  unless @connection
+    abort <<-HTML
+      <script type="text/javascript" charset="utf-8">window.close()</script>
+    HTML
+  end
   @connection
 end

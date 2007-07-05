@@ -49,11 +49,21 @@ end
 begin
   get_connection_settings(@options.database)
   @connection = get_connection
-rescue
-  puts html_head(:window_title => "SQL", :page_title => "SQL Bundle", :sub_title => 'Configuration')
-  print File.read(ENV['TM_BUNDLE_SUPPORT'] + '/install.html')
-  html_footer
-  exit
+rescue MissingConfigurationException
+  # Show initial setup message
+  html('Configuration') do
+    print File.read(ENV['TM_BUNDLE_SUPPORT'] + '/install.html')
+  end
+rescue ConnectorException => error
+  html('Connection Error') do
+    puts <<-HTML
+      <h1>Connection Error</h1>
+      <blockquote>
+        #{error.message}
+      </blockquote>
+      <p>Please correct your connection settings in the <a href="javascript:launchConfig()">configuration dialog</a>.</p>
+    HTML
+  end
 end
 
 if @options.mode == 'version'
@@ -130,11 +140,6 @@ def get_data_link(link, new_params = {})
   '<a href="javascript:getData(' + params.join(', ') + ')">' + link + "</a>"
 end
 
-def render(template_file)
-  template = File.read(File.dirname(__FILE__) + '/../templates/' + template_file + '.rhtml')
-  ERB.new(template).result(binding)
-end
-
 # ===============
 # = Entry point =
 # ===============
@@ -143,21 +148,21 @@ if @options.mode == 'tables'
   @tables = @connection.table_list(@options.database.name)
   print render('tables')
 elsif @options.mode == 'home'
-  puts html_head(:window_title => "SQL", :page_title => "Database Browser", :sub_title => @options.database.name, :html_head => render('head'))
-  STDOUT.flush
-  @content = ''
-  if @options.query.to_s.size > 0
-    @content = print_data(@options.query)
-  elsif ENV['TM_BUNDLE_SUPPORT']
-    @content = '<h2>Database Browser</h2>Please choose a table from the left'
+  html do
+    STDOUT.flush
+    @content = ''
+    if @options.query.to_s.size > 0
+      @content = print_data(@options.query)
+    elsif ENV['TM_BUNDLE_SUPPORT']
+      @content = '<h2>Database Browser</h2>Please choose a table from the left'
+    end
+    begin
+      @databases = @connection.database_list
+    rescue ConnectorException => e
+      abort e.message
+    end
+    print render('main')
   end
-  begin
-    @databases = @connection.database_list
-  rescue Exception => e
-    abort e.message
-  end
-  print render('main')
-  html_footer
 elsif @options.query.to_s.size > 0
   print print_data(@options.query)
 elsif @options.database.table

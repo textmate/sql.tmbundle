@@ -21,5 +21,10 @@ function toggleDatabases(database, tbl, hname, stype, pw, dbuser, dbport, query,
         list.style.display = 'none';
     }
 }
+
+function launchConfig() {
+    TextMate.system('"$TM_BUNDLE_SUPPORT"/bin/configure.sh 2>&1', null);
+    window.close();
+}
 </script>
 <script src="file://<%= ENV['TM_SUPPORT_PATH'] %>/script/sortable.js" type="text/javascript" charset="utf-8"></script>
