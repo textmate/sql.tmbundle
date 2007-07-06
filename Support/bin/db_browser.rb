@@ -121,9 +121,7 @@ end
 # = Template helpers =
 # ====================
 def smarty(text)
-  text.to_s.
-    sub(" -- ", ' — ').
-    sub(/ -- /, ' — ')
+  text.to_s.sub(" -- ", ' — ')
 end
 
 def escape(text)
@@ -132,6 +130,19 @@ end
 
 def e_js(str)
   str.to_s.gsub(/(?=['\\])/, '\\')
+end
+
+def format(content, type)
+  return '' unless content
+  if type == :number
+    content
+  else
+    full_content = content = escape(content).gsub("\n", "<br>")
+    if content.length > 30
+      content = content[0..30] + '<span style="color: red;font-weight: bold">' + '…</span>'
+    end
+    '<span title="' + full_content + '">' + content + '</span>'
+  end
 end
 
 def get_data_link(link, new_params = {})

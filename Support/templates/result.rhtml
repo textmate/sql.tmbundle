@@ -21,10 +21,10 @@
         <% @result.rows.each do |row| %>
             <tr class="<% $row_counter += 1; if $row_counter % 2 == 0 then %>alternate<% end %>">
                 <% row.each_with_index do |col, index| %>
-                    <td <%= 'style="text-align: right"' if @fields[index][:type] == :number %>><%= escape col.to_s[0..30] %></td>
+                    <td <%= 'style="text-align: right"' if @fields[index][:type] == :number %>><%= format col, @fields[index][:type] %></td>
                 <% end %>
             </tr>
         <% end %>
     </table>
 <% end %>
-<br />
+<br>
