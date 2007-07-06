@@ -158,21 +158,25 @@ def html(subtitle = nil)
 end
 
 def get_connection_settings(options)
-  plist      = open(File.expand_path('~/Library/Preferences/com.macromates.textmate.plist')) { |io| OSX::PropertyList.load(io) }
-  connection = plist['SQL Connections'][plist['SQL Active Connection'].first.to_i]
+  begin
+    plist      = open(File.expand_path('~/Library/Preferences/com.macromates.textmate.plist')) { |io| OSX::PropertyList.load(io) }
+    connection = plist['SQL Connections'][plist['SQL Active Connection'].first.to_i]
 
-  options.host   = connection['hostName']
-  options.user   = connection['userName']
-  if connection['serverType'] && ['mysql', 'postgresql'].include?(connection['serverType'].downcase!)
-    options.server = connection['serverType']
-  else
-    options.server = 'mysql'
-  end
-  options.name   ||= connection['database']
-  if connection['port']
-    options.port = connection['port'].to_i
-  else
-    options.port = (options.server == 'postgresql') ? 5432 : 3306
+    options.host   = connection['hostName']
+    options.user   = connection['userName']
+    if connection['serverType'] && ['mysql', 'postgresql'].include?(connection['serverType'].downcase!)
+      options.server = connection['serverType']
+    else
+      options.server = 'mysql'
+    end
+    options.name   ||= connection['database']
+    if connection['port']
+      options.port = connection['port'].to_i
+    else
+      options.port = (options.server == 'postgresql') ? 5432 : 3306
+    end
+  rescue
+    raise MissingConfigurationException.new
   end
 end
 
