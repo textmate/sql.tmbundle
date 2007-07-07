@@ -19,6 +19,10 @@
 	<key>patterns</key>
 	<array>
 		<dict>
+			<key>include</key>
+			<string>#comments</string>
+		</dict>
+		<dict>
 			<key>captures</key>
 			<dict>
 				<key>1</key>
@@ -219,19 +223,19 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\d+</string>
+			<string>\b\d+\b</string>
 			<key>name</key>
 			<string>constant.numeric.sql</string>
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>(?i:\b(select(\s+distinct)?|insert\s+(ignore\s+)?into|update|delete|from|set|where|group\sby|and|union(\s+all)?|having|order\sby|limit|(inner|cross)\s+join|straight_join|(left|right)(\s+outer)?\s+join|natural(\s+(left|right)(\s+outer)?)?\s+join)\b)</string>
+			<string>(?i:\b(select(\s+distinct)?|insert\s+(ignore\s+)?into|update|delete|from|set|where|group\sby|or|like|and|union(\s+all)?|having|order\sby|limit|(inner|cross)\s+join|straight_join|(left|right)(\s+outer)?\s+join|natural(\s+(left|right)(\s+outer)?)?\s+join)\b)</string>
 			<key>name</key>
 			<string>keyword.other.DML.sql</string>
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>(?i:\b(on\s+|(not\s+)?null)\b)</string>
+			<string>(?i:\b(on|((is\s+)?not\s+)?null)\b)</string>
 			<key>name</key>
 			<string>keyword.other.DDL.create.II.sql</string>
 		</dict>
@@ -266,8 +270,79 @@
 			<string>keyword.other.object-comments.sql</string>
 		</dict>
 		<dict>
-			<key>include</key>
-			<string>#comments</string>
+			<key>match</key>
+			<string>(?i)\bAS\b</string>
+			<key>name</key>
+			<string>keyword.other.alias.sql</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>(?i)\b(DESC|ASC)\b</string>
+			<key>name</key>
+			<string>keyword.other.order.sql</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\*</string>
+			<key>name</key>
+			<string>keyword.operator.star.sql</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>[!&lt;&gt;]?=|&lt;&gt;|&lt;|&gt;</string>
+			<key>name</key>
+			<string>keyword.operator.comparison.sql</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>-|\+|/</string>
+			<key>name</key>
+			<string>keyword.operator.math.sql</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\|\|</string>
+			<key>name</key>
+			<string>keyword.operator.concatenator.sql</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>List of SQL99 built-in functions from http://www.oreilly.com/catalog/sqlnut/chapter/ch04.html</string>
+			<key>match</key>
+			<string>(?i)\b(CURRENT_(DATE|TIME(STAMP)?|USER)|(SESSION|SYSTEM)_USER)\b</string>
+			<key>name</key>
+			<string>support.function.scalar.sql</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>List of SQL99 built-in functions from http://www.oreilly.com/catalog/sqlnut/chapter/ch04.html</string>
+			<key>match</key>
+			<string>(?i)\b(AVG|COUNT|MIN|MAX|SUM)(?=\s*\()</string>
+			<key>name</key>
+			<string>support.function.aggregate.sql</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>(?i)\b(CONCATENATE|CONVERT|LOWER|SUBSTRING|TRANSLATE|TRIM|UPPER)\b</string>
+			<key>name</key>
+			<string>support.function.string.sql</string>
+		</dict>
+		<dict>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>constant.other.database-name.sql</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>constant.other.table-name.sql</string>
+				</dict>
+			</dict>
+			<key>match</key>
+			<string>(\w+?)\.(\w+)</string>
 		</dict>
 		<dict>
 			<key>include</key>
