@@ -25,15 +25,19 @@ function shell_run_raw(cmd) {
 // Run a shell command with escaped arguments. 
 // A keyed object or a string can be passed as the argument to be escaped
 function shell_run() {
-    commands = new Array();
-    for (arg in shell_run.arguments) {
-        if (typeof shell_run.arguments[arg] == 'object') {
-            for (child_arg in shell_run.arguments[arg]) {
-                commands.push(shell_escape(shell_run.arguments[arg][child_arg]));
+    var args = Array.prototype.slice.apply(arguments), arg;
+    var commands = [];
+  
+    for (key in args) {
+        arg = args[key];
+        if (typeof(arg) == 'object') {
+            for (child_arg in arg) {
+                commands.push(shell_escape(arg[child_arg]));
             }
         } else {
-            commands.push(shell_escape(shell_run.arguments[arg]));
+            commands.push(shell_escape(arg));
         }
     }
+  
     return shell_run_raw(commands.join(' '));
 }
