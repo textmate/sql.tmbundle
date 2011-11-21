@@ -8,10 +8,6 @@
 		<string>ddl</string>
 		<string>dml</string>
 	</array>
-	<key>foldingStartMarker</key>
-	<string>\s*\(\s*$</string>
-	<key>foldingStopMarker</key>
-	<string>^\s*\)</string>
 	<key>keyEquivalent</key>
 	<string>^~S</string>
 	<key>name</key>
