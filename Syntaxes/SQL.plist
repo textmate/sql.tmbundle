@@ -201,7 +201,7 @@
 				|\b(char|number|varchar\d?)\b(?:\((\d+)\))?
 
 				# special case, capture 6 + 7i + 8i
-				|\b(numeric)\b(?:\((\d+),(\d+)\))?
+				|\b(numeric|decimal)\b(?:\((\d+),(\d+)\))?
 
 				# special case, captures 9, 10i, 11
 				|\b(times)(?:\((\d+)\))(\swithoutstimeszone\b)?
