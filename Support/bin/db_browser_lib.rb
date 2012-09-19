@@ -188,7 +188,7 @@ end
 
 def get_connection_settings(options)
   begin
-    plist = open(File.expand_path('~/Library/Preferences/com.macromates.textmate.plist')) { |io| OSX::PropertyList.load(io) }
+    plist = open(File.expand_path("~/Library/Preferences/#{ENV['TM_APP_IDENTIFIER'] || 'com.macromates.textmate'}.plist")) { |io| OSX::PropertyList.load(io) }
 
     unless connection = plist['SQL Connections'].find { |conn| conn['title'] == ENV['TM_SQL_CONNECTION'] }
       connection = plist['SQL Connections'][plist['SQL Active Connection'].first.to_i]
