@@ -1,33 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>#!/usr/bin/env perl
-$/=\0;$_=&lt;&gt;; # Read all input
+	<string>#!/usr/bin/env ruby
 
-s/\s*\-\-.*$//g; # Strip comments
+res = STDIN.read
 
-1while s@^(([^'"]*["'][^'"]*["'])*[^"']*)(\n+|\s{2,})@$1 @; # Compact whitespace
+# Remove extraneous scope xml
+res.gsub!(/&lt;(?!\/?(string|comment)\.)[^&gt;]*&gt;/, '')
 
-# set defaultCStringEncoding to UTF-8 and open pbcopy
-open(PBCOPY, '|__CF_USER_TEXT_ENCODING=$UID:0x8000100:0x8000100 pbcopy');
-print PBCOPY; # Print the SQL to pbcopy
-close PBCOPY;
-print "Copied SQL to Clipboard";</string>
+# Remove comments
+res.gsub!(/&lt;comment\.[^&gt;]*&gt;[^&lt;]*?&lt;\/comment\.[^&gt;]*&gt;/, '')
+
+# Compact whitespace, leaving strings alone
+res.gsub!(/(?:([^&lt;]+)|(&lt;string\.[^&gt;]*&gt;[^&lt;]*?&lt;\/string\.[^&gt;]*&gt;))/) {
+  if $1
+    out = $1
+    out = out.gsub(/\n/, ' ')
+    out = out.gsub(/\s{2,}/, ' ')
+  elsif $2
+    $2
+  end
+}
+
+# Remove string tags
+res.gsub!(/&lt;\/?string\.[^&gt;]*&gt;/, '')
+
+# Un-encode entities
+res.gsub!(/&amp;amp;/, '&amp;')
+res.gsub!(/&amp;lt;/,  '&lt;')
+
+IO.popen('pbcopy', 'w') { |io| io &lt;&lt; res }
+
+puts "Copied SQL to Clipboard"
+</string>
 	<key>input</key>
 	<string>selection</string>
+	<key>inputFormat</key>
+	<string>xml</string>
 	<key>keyEquivalent</key>
 	<string>~@C</string>
 	<key>name</key>
 	<string>Copy Condensed SQL</string>
-	<key>output</key>
-	<string>showAsTooltip</string>
+	<key>outputCaret</key>
+	<string>afterOutput</string>
+	<key>outputFormat</key>
+	<string>text</string>
+	<key>outputLocation</key>
+	<string>toolTip</string>
 	<key>scope</key>
 	<string>source.sql</string>
 	<key>uuid</key>
 	<string>37E7E7F5-DD1E-4306-B258-0F9176DC8D7E</string>
+	<key>version</key>
+	<integer>2</integer>
 </dict>
 </plist>
