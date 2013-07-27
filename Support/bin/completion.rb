@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby
 
 require 'ostruct'
 require File.dirname(__FILE__) + '/db_browser_lib'
