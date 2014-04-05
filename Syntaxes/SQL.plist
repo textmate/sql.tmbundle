@@ -348,6 +348,27 @@
 			<key>include</key>
 			<string>#regexps</string>
 		</dict>
+		<dict>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.section.scope.begin.sql</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.section.scope.end.sql</string>
+				</dict>
+			</dict>
+			<key>comment</key>
+			<string>Allow for special ↩ behavior</string>
+			<key>match</key>
+			<string>(\()(\))</string>
+			<key>name</key>
+			<string>meta.block.sql</string>
+		</dict>
 	</array>
 	<key>repository</key>
 	<dict>
