@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>contactEmailRot13</key>
 	<string>pvnjny@tznvy.pbz</string>
 	<key>contactName</key>
 	<string>Ciarán Walsh</string>
+	<key>description</key>
+	<string>Database query language with support for MySQL and PostgreSQL.</string>
 	<key>mainMenu</key>
 	<dict>
 		<key>items</key>
