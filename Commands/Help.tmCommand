@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>beforeRunningCommand</key>
@@ -23,7 +23,7 @@ The SQL bundle allows you to browse MySQL/PostgreSQL databases and execute queri
 
 # Configuration
 
-Before you can use the SQL bundle you must configure at least one SQL connection using the &lt;a href="javascript:launchConfig()"&gt;*Configure*&lt;/a&gt; command.
+Before you can use the SQL bundle you must configure at least one SQL connection using the &lt;a href="javascript:launchConfig()"&gt;*Preferences*&lt;/a&gt; command.
 You must provide at least a username and a hostname (note that if you wish to connect locally bypassing a socket, you must use `127.0.0.1` rather than `localhost`).
 
 You can store multiple connections – use the ‘+’ button to add another connection. Whichever profile is selected when you close the dialog will be used when connecting.
@@ -34,13 +34,13 @@ Alternatively you can set `TM_SQL_CONNECTION` to the title of a connection and i
 
 The _Execute Line / Selection as Query_ command takes the selected text or current line and submits it as a query to either MySQL or PostgreSQL.
 
-You will need to setup a database connection via the &lt;a href="javascript:launchConfig()"&gt;*Configure*&lt;/a&gt; command. Pressing ⌃⇧Q on an empty line will open the database browser.
+You will need to setup a database connection via the &lt;a href="javascript:launchConfig()"&gt;*Preferences*&lt;/a&gt; command. Pressing ⌃⇧Q on an empty line will open the database browser.
 
 # Database Browser
 
 The database browser command displays a list of tables in whatever database you are currently working in using either PostgreSQL or MySQL. Click on the name of a database on the left to view the tables in that database.
 
-The connection to your server is setup with the &lt;a href="javascript:launchConfig()"&gt;*Configure*&lt;/a&gt; command.
+The connection to your server is setup with the &lt;a href="javascript:launchConfig()"&gt;*Preferences*&lt;/a&gt; command.
 
 MARKDOWN
 
@@ -48,13 +48,21 @@ html_footer
 </string>
 	<key>input</key>
 	<string>none</string>
+	<key>inputFormat</key>
+	<string>text</string>
 	<key>name</key>
 	<string>Help</string>
-	<key>output</key>
-	<string>showAsHTML</string>
+	<key>outputCaret</key>
+	<string>afterOutput</string>
+	<key>outputFormat</key>
+	<string>html</string>
+	<key>outputLocation</key>
+	<string>newWindow</string>
 	<key>scope</key>
 	<string>source.sql</string>
 	<key>uuid</key>
 	<string>FE9FF936-7E32-11D9-B7C6-000D93B6E43C</string>
+	<key>version</key>
+	<integer>2</integer>
 </dict>
 </plist>

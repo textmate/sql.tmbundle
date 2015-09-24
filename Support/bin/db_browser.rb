@@ -64,7 +64,7 @@ rescue ConnectorException => error
       <blockquote>
         #{error.message}
       </blockquote>
-      <p>Please correct your connection settings in the <a href="javascript:launchConfig()">configuration dialog</a>.</p>
+      <p>Please correct your connection settings in the <a href="javascript:launchConfig()">preferences dialog</a>.</p>
     HTML
   end
 end
